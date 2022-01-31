@@ -21,33 +21,19 @@ router.post("/login", async (req, res, next) => {
 });
 
 // Register Route
-router.post("/register", async (req, res) => {
-  try {
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(req.body.password, salt);
-    req.body.password = passwordHash;
-    const newUser = await User.create(req.body);
-    res.status(201).json({
-      currentUser: newUser,
-      isLoggedIn: true,
-    });
-  } catch (err) {
-    res.status(400).json({ err: err.message });
-  }
-});
-
-const register = async (req, res, next) => {
+router.post("/register", async (req, res, next) => {
   try {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(req.body.password, salt);
     const pwStore = req.body.password;
     req.body.password = passwordHash;
+
     const newUser = await User.create(req.body);
     if (newUser) {
       req.body.password = pwStore;
       const authenticatedUserToken = createUserToken(req, newUser);
       res.status(201).json({
-        currentUser: newUser,
+        user: newUser,
         isLoggedIn: true,
         token: authenticatedUserToken,
       });
@@ -57,9 +43,9 @@ const register = async (req, res, next) => {
   } catch (err) {
     res.status(400).json({ err: err.message });
   }
-};
+});
 
-router.get("/logout", requireToken, async (req, res, next) => {
+router.get("/logout", async (req, res, next) => {
   try {
     const currentUser = req.user.username;
     delete req.user;
