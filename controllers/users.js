@@ -2,7 +2,11 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
-const { createUserToken, requireToken } = require("../middleware/auth");
+const {
+  createUserToken,
+  requireToken,
+  handleValidateOwnership,
+} = require("../middleware/auth");
 
 //Login Route
 router.post("/login", async (req, res, next) => {
@@ -45,25 +49,16 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
-router.get("/logout", async (req, res, next) => {
+router.get("/logout", requireToken, async (req, res, next) => {
   try {
+    console.log(req);
     const currentUser = req.user.username;
     delete req.user;
     res.status(200).json({
-      mesage: `${currentUser} currently logged in`,
+      mesage: `${currentUser} just logged out`,
       isLoggedIn: false,
       token: "",
     });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-router.get("/login", async (req, res) => {
-  try {
-    const foundUsers = await User.find();
-    console.log(foundUsers);
-    res.status(200).json(foundUsers);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
