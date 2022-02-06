@@ -16,7 +16,7 @@ const session = require("express-session");
 
 const userController = require("./controllers/users");
 const furnController = require("./controllers/furnitureController");
-
+const cartController = require("./controllers/cartController");
 // cors
 const whiteList = ["http://localhost:3000"];
 
@@ -46,7 +46,7 @@ app.use(
 // controllers
 app.use("/auth", userController);
 app.use("/furn", furnController);
-
+app.use("/cart", cartController);
 //routes
 
 const isAuthenticated = (req, res, next) => {
