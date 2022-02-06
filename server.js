@@ -6,9 +6,16 @@ const PORT = process.env.PORT || 9000;
 const bodyParser = require("body-parser");
 require("./db/db");
 
+// IMPORT//REQUIRE FOR PREPOPULATING MONGOOSE, RUN ONCE!!
+const furnitureDummy = require("./sampleData/furnitureDummy.js");
+const Furniture = require("./models/furniture.js");
+const mongoose = require("mongoose");
+
 // additional packages - MIDDLEWARE
 const session = require("express-session");
+
 const userController = require("./controllers/users");
+const furnController = require("./controllers/furnitureController");
 
 // cors
 const whiteList = ["http://localhost:3000"];
@@ -38,6 +45,7 @@ app.use(
 
 // controllers
 app.use("/auth", userController);
+app.use("/furn", furnController);
 
 //routes
 
@@ -48,6 +56,15 @@ const isAuthenticated = (req, res, next) => {
     res.status(400).json({ error: "error" });
   }
 };
+
+// Dummy Data , run once and then comment out
+// Furniture.insertMany(furnitureDummy, (err, furn) => {
+//   if (err) {
+//     console.log(err);
+//   }
+//   console.log("added provided furniture data", furn);
+//
+// });
 
 app.listen(PORT, () => {
   console.log("Now listening on port", PORT);
