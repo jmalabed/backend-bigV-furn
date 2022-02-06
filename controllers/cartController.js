@@ -3,7 +3,8 @@ const router = express.Router();
 const Cart = require("../models/cart");
 
 //build routes out.
-// get all carts
+
+// get all carts tested
 router.get("/", async (req, res, next) => {
   try {
     const allCarts = await Cart.find();
@@ -12,35 +13,49 @@ router.get("/", async (req, res, next) => {
     res.status(400).json({ err: err.message });
   }
 });
-// get all in cart
-router.get("/:cartId", async (req, res, next) => {
+
+// get specific cart tested
+router.get("/:userId", async (req, res, next) => {
   try {
-    const cartId = req.params.cartId;
-    const foundCart = await Cart.findById(id);
+    const userId = req.params.userId;
+    const foundCart = await Cart.findOne({ owner: userId });
     res.status(200).json(foundCart);
   } catch (err) {
     res.status(400).json({ err: err.message });
   }
 });
 
-// edit cart
-router.put("/:cartId", async (req, res, next) => {
+// create cart tested
+router.post("/", async (req, res, next) => {
   try {
-    const cartId = req.params.cartId;
-    const edits = req.body;
-    const editedCart = await Cart.findByIdAndUpdate(cartId, edits, {
-      new: true,
-    });
-    res.status(200).json();
+    const cartThings = req.body;
+    const createdCart = await Cart.create(cartThings);
+    res.status(200).json(createdCart);
   } catch (err) {
     res.status(400).json({ err: err.message });
   }
 });
 
-// delete cart
-router.get("/", async (req, res, next) => {
+// edit cart tested
+router.put("/:userId", async (req, res, next) => {
   try {
-    res.status(200).json();
+    const userId = req.params.userId;
+    const edits = req.body;
+    const editedCart = await Cart.updateOne({ owner: userId }, edits, {
+      new: true,
+    });
+    res.status(200).json(editedCart);
+  } catch (err) {
+    res.status(400).json({ err: err.message });
+  }
+});
+
+// delete cart tested
+router.delete("/:userId", async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+    const deletedCart = await Cart.findOneAndDelete({ owner: userId });
+    res.status(200).json(deletedCart);
   } catch (err) {
     res.status(400).json({ err: err.message });
   }

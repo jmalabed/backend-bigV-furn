@@ -64,4 +64,13 @@ router.get("/logout", requireToken, async (req, res, next) => {
   }
 });
 
+router.get("/", async (req, res, next) => {
+  try {
+    const allUsers = await User.find();
+    res.status(200).json(allUsers);
+  } catch (err) {
+    res.status(400).json({ err: err.message });
+  }
+});
+
 module.exports = router;
