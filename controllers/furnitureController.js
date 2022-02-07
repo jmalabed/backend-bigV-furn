@@ -35,21 +35,20 @@ router.get("/type/:type", async (req, res, next) => {
   try {
     const type = req.params.type;
     const allFurnType = await Furniture.find({ type });
-    res.status(201).json(allFurnType);
+    res.status(200).json(allFurnType);
   } catch (err) {
     res.status(400).json({ err: err.message });
   }
 });
 
 // put route
-router.put("/:title", async (req, res, ext) => {
+router.put("/:id", async (req, res, ext) => {
   try {
-    const title = req.params.title;
-    const updatedFurn = await Furniture.findOne({ title });
+    const id = req.params.id;
+    const updatedFurn = await Furniture.findOne({ _id: id });
     res.status(200).json({ updatedFurn });
   } catch (err) {
     res.status(400).json({ err: err.message });
-  } finally {
   }
 });
 
