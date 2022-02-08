@@ -25,7 +25,7 @@ router.get("/:id", async (req, res, next) => {
   try {
     const id = req.params.id;
     const foundFurn = await Furniture.findById(id);
-    res.status(200).json({ foundFurn });
+    res.status(200).json(foundFurn);
   } catch (err) {
     res.status(400).json({ err: err.message });
   }
