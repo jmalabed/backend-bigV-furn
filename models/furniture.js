@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const furnSchema = mongoose.Schema({
   title: { type: String, required: true },
+  qty: { type: Number, default: 0, required: true },
   category: { type: String, required: true },
   type: { type: String, required: true },
   finish: { type: String, required: true },

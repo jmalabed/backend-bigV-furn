@@ -62,12 +62,13 @@ router.post("/", async (req, res, next) => {
     res.status(400).json({ err: err.message });
   }
 });
-// delete route
+// delete route// wipe all
 router.delete("/", async (req, res, next) => {
   try {
-    console.log("hit route");
+    const deletedFurn = await Furniture.deleteMany();
+    res.status(200).json(deletedFurn);
   } catch (err) {
-    console.log(err);
+    res.status(400).josn(err);
   }
 });
 
