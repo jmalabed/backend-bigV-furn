@@ -5,6 +5,8 @@ const app = express();
 const PORT = process.env.PORT || 9000;
 const bodyParser = require("body-parser");
 require("./db/db");
+const QuickBooks = require("node-quickbooks");
+const fetch = require("fetch");
 
 // IMPORT//REQUIRE FOR PREPOPULATING MONGOOSE, RUN ONCE!!
 const furnitureDummy = require("./sampleData/furnitureDummy.js");
@@ -15,6 +17,8 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const userController = require("./controllers/users");
 const furnController = require("./controllers/furnitureController");
+const sendgridController = require("./controllers/sendgridController");
+const intuitController = require("./controllers/intuitController");
 
 // cors
 const whiteList = ["http://localhost:3000"];
@@ -44,7 +48,8 @@ app.use(
 // controllers
 app.use("/auth", userController);
 app.use("/furn", furnController);
-
+app.use("/sendgrid", sendgridController);
+app.use("/intuit", intuitController);
 // ******* OAUTH2 Routes *******
 /*
                       ENDPOINTS!
@@ -55,90 +60,6 @@ url/oa/getCompanyInfo -- show company
 
 */
 // App variables
-let oauth2_token_json = null;
-let redirectUri = "http://localhost:9000/callback";
-const urlencodedParser = bodyParser.urlencoded({ extended: false });
-// instantiate new client
-const OAuthClient = require("intuit-oauth");
-
-let oauthClient = null;
-// Routes
-// get the authorizeUri
-app.get("/authUri", urlencodedParser, async (req, res) => {
-  try {
-    oauthClient = new OAuthClient({
-      clientId: process.env.CLIENTID,
-      clientSecret: process.env.CLIENTSECRET,
-      environment: "sandbox",
-      redirectUri: redirectUri,
-    });
-    const authUri = oauthClient.authorizeUri({
-      scope: [OAuthClient.scopes.Accounting, OAuthClient.scopes.payment],
-      state: "intuit-test",
-    });
-    res.status(200).json(authUri);
-  } catch (err) {
-    res.status(400).json(err);
-  }
-});
-
-//handle callback function -- req.url needs to be updated
-app.get("/callback", async (req, res) => {
-  oauthClient
-    .createToken(req.url)
-    .then(function (authResponse) {
-      oauth2_token_json = JSON.stringify(authResponse.getJson(), null, 2);
-    })
-    .catch(function (e) {
-      res.status(400).json(e);
-    });
-
-  res.status(200).json("");
-});
-
-app.get("/retrieveToken", function (req, res) {
-  res.status(200).send(oauth2_token_json);
-});
-
-// refresh access token -- response of res.send needs to be updated
-app.get("/refreshAccessToken", function (req, res) {
-  oauthClient
-    .refresh()
-    .then(function (authResponse) {
-      console.log(
-        `The Refresh Token is  ${JSON.stringify(authResponse.getJson())}`
-      );
-      oauth2_token_json = JSON.stringify(authResponse.getJson(), null, 2);
-      res.status(200).json(oauth2_token_json);
-    })
-    .catch(function (e) {
-      res.status(400).json({ error: e });
-    });
-});
-
-// get companyinfo
-app.get("/getCompanyInfo", function (req, res) {
-  const companyID = oauthClient.getToken().realmId;
-
-  const url =
-    oauthClient.environment == "sandbox"
-      ? OAuthClient.environment.sandbox
-      : OAuthClient.environment.production;
-
-  oauthClient
-    .makeApiCall({
-      url: `${url}v3/company/${companyID}/companyinfo/${companyID}`,
-    })
-    .then(function (authResponse) {
-      console.log(
-        `The response for API call is :${JSON.stringify(authResponse)}`
-      );
-      res.status(200).json(authResponse.text());
-    })
-    .catch(function (e) {
-      res.status(400).json({ error: e });
-    });
-});
 
 // ***** ROUTE NOT FOUND *******
 app.get("/", (req, res) => {
@@ -159,12 +80,12 @@ const isAuthenticated = (req, res, next) => {
 };
 
 // Dummy Data , run once and then comment out
-Furniture.insertMany(furnitureDummy, (err, furn) => {
-  if (err) {
-    console.log(err);
-  }
-  console.log("added provided furniture data", furn);
-});
+// Furniture.insertMany(furnitureDummy, (err, furn) => {
+//   if (err) {
+//     console.log(err);
+//   }
+//   console.log("added provided furniture data", furn);
+// });
 
 app.listen(PORT, () => {
   console.log("Now listening on port", PORT);
